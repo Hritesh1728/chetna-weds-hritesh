@@ -216,7 +216,7 @@ h1,h2,h3{margin:0;font-weight:600}
 .map-toggle{position:absolute;z-index:5;top:12px;left:12px;display:flex;background:#fff8f8;border:1px solid #e9c48a;border-radius:999px;padding:3px;box-shadow:0 6px 16px #0002}
 .map-toggle button{font:500 13px var(--ui);border:none;background:transparent;color:var(--maroon);padding:8px 14px;border-radius:999px;cursor:pointer}
 .map-toggle button[aria-pressed=true]{background:var(--maroon);color:#fff}
-.routes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:16px 0 4px}
+.routes{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:16px 0 4px}
 .route-chip{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;font:500 15px var(--ui);color:var(--ink);background:#fff;border:1px solid #f1c8d8;border-radius:14px;padding:12px 14px 12px 18px;cursor:pointer;overflow:hidden;transition:background .2s,border-color .2s,box-shadow .2s}
 .route-chip::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--c,var(--gold))}
 .route-chip span{display:flex;align-items:center;gap:8px;white-space:nowrap}
@@ -621,3 +621,15 @@ a,button{-webkit-tap-highlight-color:transparent}
 .sched li span{order:0}
 .sched li b{order:2;font:500 14px var(--num);color:var(--ea,var(--maroon));white-space:nowrap;text-align:right}
 @media(max-width:640px){.sched li{font-size:14px;padding:6px 0}.sched li b{font-size:13px}}
+
+/* map: Alwar label hangs below its dot, groom's home in Bansur gets a highlighted label */
+.rtag.below{flex-direction:column-reverse}
+.rtag.groom .pill{background:#e91e63;color:#fff;border-color:#fff}
+.rtag.groom .pill small{color:#ffe3ef}
+.rtag.groom .dot{width:16px;height:16px;background:#e91e63;box-shadow:0 0 0 4px #e91e6340,0 1px 4px #0006}
+.map-foot .btn.ghost-m{background:transparent;background-image:none;color:var(--maroon);box-shadow:inset 0 0 0 1.5px var(--maroon)}
+
+/* both homes use the same pin + label; a soft km/time line under the groom's label */
+.venue-tag small{display:block;font:400 11px "Roboto",var(--ui);color:#ffe3ef;text-align:center}
+.venue-tag small:empty{display:none}
+.venue-pin.dim{opacity:.45}

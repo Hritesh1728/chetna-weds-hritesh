@@ -131,11 +131,11 @@ var MAPBOX_TOKEN = 'pk.eyJ1IjoiaHJpdGVzaC1zYWluaSIsImEiOiJjbXZ4Z2Z0bncwZmV2NGRzO
 /* ---------- mobile UX: calendar, swipe dots, guest stepper, quick-action bar ---------- */
 (function(){
   /* add to calendar: Google Calendar on Android, an .ics file everywhere else */
-  var LOC = 'M.P Jain Marriage Garden, in front of Shri Shankargarh Aashram, Tijara, Rajasthan';
-  var MAP = 'https://maps.app.goo.gl/huGbayykEepRddmMA';
+  var LOC0 = 'M.P Jain Marriage Garden, in front of Shri Shankargarh Aashram, Tijara, Rajasthan';
+  var MAP0 = 'https://maps.app.goo.gl/huGbayykEepRddmMA';
   document.querySelectorAll('.cal').forEach(function(b){
     b.addEventListener('click', function(){
-      var t = b.dataset.title, s = b.dataset.start, e = b.dataset.end;
+      var t = b.dataset.title, s = b.dataset.start, e = b.dataset.end, LOC = b.dataset.loc || LOC0, MAP = b.dataset.map || MAP0;
       if (/Android/i.test(navigator.userAgent)) {
         window.open('https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(t) + '&dates=' + s + '/' + e +
           '&location=' + encodeURIComponent(LOC) + '&details=' + encodeURIComponent('Directions: ' + MAP), '_blank', 'noopener');
@@ -244,7 +244,8 @@ window.addEventListener('load', function(){
     {name:'Jaipur',   at:[75.7873, 26.9124], color:'#d97706'},
     {name:'Alwar',    at:[76.6346, 27.5530], color:'#2f7d32'},
     {name:'Rewari',   at:[76.6170, 28.1970], color:'#0e7490'},
-    {name:'Kotputli', at:[76.1994, 27.7022], color:'#7c3aed'}
+    {name:'Kotputli', at:[76.1994, 27.7022], color:'#7c3aed'},
+    {name:'Bansur',   at:[76.365031, 27.697652], color:'#e91e63', groom:true}
   ];
   if (!window.mapboxgl || !/^pk\./.test(MAPBOX_TOKEN)) {
     var fb = document.createElement('div'); fb.className = 'map-fallback';
@@ -323,21 +324,30 @@ window.addEventListener('load', function(){
   /* route tags: a pill on a stem above each starting city (Alwar sits left so it does not cover the venue) */
   var tags = {};
   CITIES.forEach(function(c){
-    var left = c.name === 'Alwar';
-    var tag = document.createElement('div'); tag.className = 'rtag' + (left ? ' left' : ''); tag.style.setProperty('--c', c.color);
-    tag.innerHTML = '<div class="pill"><span>' + c.name + '</span><small></small></div><div class="stem"></div><div class="dot"></div>';
-    tag.title = 'Route from ' + c.name;
+    if (c.groom){
+      /* groom's home: same pin and label style as the bride's home in Tijara */
+      var gp = document.createElement('div'); gp.className = 'venue-pin';
+      gp.innerHTML = pin.innerHTML + '<div class="venue-tag">\u2665 Groom\'s Home \u00b7 Bansur<small></small></div>';
+      gp.title = 'Lagan & Tikka, 22 Nov: Tijara to Bansur';
+      var gpop = new mapboxgl.Popup({offset:34, closeButton:false}).setHTML('<strong>Groom\'s Home</strong>Dhani Sillar, Bansur<br>Lagan &amp; Tikka \u00b7 Sun 22 Nov<br><a href="https://www.google.com/maps/dir/?api=1&destination=27.697652,76.365031" target="_blank" rel="noopener">Directions</a>');
+      new mapboxgl.Marker({element:gp, anchor:'bottom'}).setLngLat(c.at).setPopup(gpop).addTo(map);
+      tags[c.name] = gp; return;
+    }
+    var left = c.name === 'Kotputli', below = c.name === 'Alwar';
+    var tag = document.createElement('div'); tag.className = 'rtag' + (left ? ' left' : '') + (below ? ' below' : '') + (c.groom ? ' groom' : ''); tag.style.setProperty('--c', c.color);
+    tag.innerHTML = '<div class="pill"><span>' + (c.groom ? '♥ Groom\'s home · Bansur' : c.name) + '</span><small></small></div><div class="stem"></div><div class="dot"></div>';
+    tag.title = c.groom ? 'Lagan & Tikka, 22 Nov: Tijara to Bansur' : 'Route from ' + c.name;
     tag.addEventListener('click', function(e){ e.stopPropagation(); highlight(c.name); });
-    new mapboxgl.Marker({element:tag, anchor: left ? 'right' : 'bottom', offset: left ? [6,0] : [0,6]}).setLngLat(c.at).addTo(map);
+    new mapboxgl.Marker({element:tag, anchor: left ? 'right' : (below ? 'top' : 'bottom'), offset: left ? [6,0] : (below ? [0,-6] : [0,6])}).setLngLat(c.at).addTo(map);
     tags[c.name] = tag;
   });
-  var vt = document.createElement('div'); vt.className = 'venue-tag'; vt.textContent = 'M.P Jain Marriage Garden'; pin.appendChild(vt);
+  var vt = document.createElement('div'); vt.className = 'venue-tag'; vt.textContent = '\u2665 Bride\'s Home \u00b7 Tijara'; pin.appendChild(vt);
 
   ready.then(function(){
     chip('all', 'All routes', '#d99a2b', 'Overview');
     CITIES.forEach(function(c){
       var info = c.km ? c.km + ' km · ' + c.time : 'Route';
-      chip(c.name, 'From ' + c.name, c.color, info);
+      chip(c.name, c.groom ? 'Tijara → Bansur (Lagan)' : 'From ' + c.name, c.color, info);
       if (c.km) tags[c.name].querySelector('small').textContent = c.km + ' km · ' + c.time;
     });
     var put = function(){ if (map.getSource('routes')) map.getSource('routes').setData({type:'FeatureCollection', features:features}); else addLayers(); map.fitBounds(bounds(features), {padding:pad(), duration:1600}); };
